@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "chrome": "chrome http://localhost:6969",
     "start": "npm run chrome && node ./dist/server.js",
@@ -13,6 +14,8 @@
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^20.14.10",
-    "typescript": "^5.5.3"
+    "@types/ws": "^8.5.11",
+    "typescript": "^5.5.3",
+    "ws": "^8.18.0"
   }
 }
