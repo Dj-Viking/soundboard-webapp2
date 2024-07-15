@@ -29,7 +29,9 @@ function renderApp(
     
     setupDocumentHead(styles);
     document.body.innerHTML = "";
-    document.body.appendChild(button.createButton({}).el);
+    const container = setupSoundboardContainer(button);
+    
+    document.body.append(container);
 }
 
 function setupDocumentHead(styles: typeof import("./Styles.js")): void {
@@ -41,4 +43,15 @@ function setupDocumentHead(styles: typeof import("./Styles.js")): void {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
     `;
     document.head.append(title, styles.createStyles());
+}
+
+
+function setupSoundboardContainer(button: typeof import("./Button.js")): HTMLDivElement {
+    const soundboardContainer = document.createElement("div");
+    soundboardContainer.classList.add("soundboard-container");
+
+    // TODO: create button list from buttons inside
+    // indexedDB and append to soundboardContainer
+    soundboardContainer.append(button.createButton({}).el)
+    return soundboardContainer;
 }
