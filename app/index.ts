@@ -26,16 +26,19 @@ function renderApp(
     button: typeof import("./Button.js"),
     styles: typeof import("./Styles.js")
 ) {
+    
+    setupDocumentHead(styles);
+    document.body.innerHTML = "";
+    document.body.appendChild(button.createButton({}).el);
+}
+
+function setupDocumentHead(styles: typeof import("./Styles.js")): void {
     const title = document.createElement("title");
     title.textContent = "Soundboard App";
     document.head.innerHTML = "";
-    document.body.innerHTML = "";
     document.head.innerHTML = `
-    
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Soundboard App</title>
     `;
-    document.head.appendChild(styles.createStyles());
-    document.body.appendChild(button.createButton({}).el);
+    document.head.append(title, styles.createStyles());
 }
