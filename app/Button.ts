@@ -66,6 +66,7 @@ export function createButton(props: Partial<ButtonProps>): Button {
     button.fileInputEl = fileInputEl;
     button.filenameSpan = filenameSpan;
     button.color = color;
+    button.el.style.backgroundColor = color;
     button.hasAudioFile = false;
 
     return button;
