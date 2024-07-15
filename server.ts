@@ -16,8 +16,14 @@ const handleGetRequest: http.RequestListener = (req, res) => {
                 if (req.url?.includes("common")) {
                     return `./dist/common.js`;
                 } else {
-                    const basicurl = req.url?.split("?")[0];
-                    return `./dist/app/${basicurl}`;
+                    let basicurl = "";
+                    if (req.url?.includes("?")) {
+                        basicurl = req.url?.split("?")[0];
+                        return `./dist/app/${basicurl}`;
+
+                    } else {
+                        return `./dist/app/${req.url}`
+                    }
                 }
             })();
             fs.readFile(pth, (err, data) => {
