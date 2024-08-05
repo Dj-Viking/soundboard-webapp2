@@ -9,6 +9,120 @@ import {
     DEFAULT_XONE_MAPPING_PREFERENCE_TABLE,
 } from "./MIDIController.js";
 
+export function createMIDIMappingPreference<N extends MIDIInputName>(name: N): IMIDIMappingPreference<N> {
+    const instance: IMIDIMappingPreference<typeof name> = {
+        "callbackMap": {} as any,
+        "id": name,
+        "mapping": {} as any,
+        "name": name
+    }
+    setMIDIMappingBasedOnInputName(instance, name);
+    setMIDICallbackMapBasedOnControllerName(instance);
+    
+    return instance;
+}
+
+export function getControlNameFromControllerInUseUIMapping(
+    mappingInUse: MIDIMapping<MIDIInputName>,
+    uiName: UIInterfaceDeviceName
+): string {
+    let ret = "";
+
+    for (const controlName of Object.keys(mappingInUse)) {
+        if (uiName === mappingInUse[controlName].uiName) {
+            ret = controlName;
+            break;
+        } else {
+            ret = "unknown control name mapping";
+        }
+    }
+
+    return ret;
+}
+
+export function setMIDIMappingBasedOnInputName<N extends MIDIInputName>(_this: IMIDIMappingPreference<N>, name: N): void {
+    switch (name) {
+        case "TouchOSC Bridge":
+            Object.keys(DEFAULT_TOUCHOSC_MAPPING_PREFERENCE_TABLE).forEach((key) => {
+                _this.mapping = {
+                    ..._this.mapping,
+                    [key]: DEFAULT_TOUCHOSC_MAPPING_PREFERENCE_TABLE[key],
+                };
+            });
+            break;
+        case "XONE:K2 MIDI":
+            Object.keys(DEFAULT_XONE_MAPPING_PREFERENCE_TABLE).forEach((key) => {
+                _this.mapping = {
+                    ..._this.mapping,
+                    [key]: DEFAULT_XONE_MAPPING_PREFERENCE_TABLE[key],
+                };
+            });
+            break;
+        default:
+            break;
+    }
+}
+
+export function setMIDICallbackMapBasedOnControllerName(_this: IMIDIMappingPreference<MIDIInputName>): void {
+    Object.keys(DEFAULT_CALLBACK_TABLE).forEach((uiName) => {
+        _this.callbackMap = {
+            ..._this.callbackMap,
+            [uiName]: generateCallbackBasedOnUIName(uiName),
+        };
+    });
+}
+
+export function generateCallbackBasedOnUIName<P extends keyof CallbackMapping>(
+    uiName: UIInterfaceDeviceName
+): CallbackMapping[P] {
+    switch (uiName) {
+        case "volume_fader": {
+            return () => {
+                console.error("todo VOLUME FADER MAPPING");
+            };
+        }
+        case "button_1_position": {
+            return () => {
+                createButtonCallback("button id");
+            };
+        }
+        case "button_2_position": {
+            return () => {
+                createButtonCallback("button id2");
+            };
+        }
+        default:
+            return (_midiIntensity: number) => void 0;
+    }
+}
+
+export function listeningForEditsHandler(): void {
+    console.log("listening for edits");
+    console.error("TODO");
+}
+
+export function createButtonCallback(btnId: string): void {
+    console.error("TODO", "btn id CALLBACK MAPPING", btnId);
+}
+
+export function updatePreferenceMapping(
+    _this: IMIDIMappingPreference<typeof name>,
+    name: MIDIInputName,
+    controlName: GenericControlName<typeof name>,
+    channel: number,
+    uiName: UIInterfaceDeviceName
+): IMIDIMappingPreference<typeof name> {
+    // update this.mapping and this.callbackmap
+    let ret: typeof _this = {} as any;
+    Object.assign(ret, _this);
+    ret.mapping[controlName].channel = channel;
+    ret.mapping[controlName].uiName = uiName;
+
+    setMIDICallbackMapBasedOnControllerName(ret);
+
+    return ret;
+}
+
 export type MIDIMapping<N extends MIDIInputName> = Record<
     GenericControlName<N>,
     {
@@ -21,7 +135,7 @@ export type CallbackMapping = typeof DEFAULT_CALLBACK_TABLE;
 
 /**
  * this example shows the collection of preferences that would be stored
- * in some storage place eventually
+ * in some storage place eventually [stored in localStorage]
  * @example
  * const preference = {
  *     [this.name]: {
@@ -51,120 +165,10 @@ export type CallbackMapping = typeof DEFAULT_CALLBACK_TABLE;
  * const uiName = preference[midiname][controlName];
  * callbackMap[uiName]()
  */
-export class MIDIMappingPreference<N extends MIDIInputName> {
-    public id: string;
-    public name: N;
-    public mapping: MIDIMapping<N> = {} as any;
-    public callbackMap: CallbackMapping = {} as any;
-
-    public constructor(name: N) {
-        this.name = name;
-        this.id = name;
-
-        this.#setMIDIMappingBasedOnInputName(name);
-        // TODO: since functions can't be serialized into JSON for local storage
-        // will have to regenerate the callbacks based on which controlName object is mapped to a particular UI interface names
-        MIDIMappingPreference.setMIDICallbackMapBasedOnControllerName(this);
-    }
-
-    public static listeningForEditsHandler(): void {
-        console.log("listening for edits");
-        console.error("TODO");
-    }
-
-    public static getControlNameFromControllerInUseUIMapping(
-        mappingInUse: MIDIMapping<MIDIInputName>,
-        uiName: UIInterfaceDeviceName
-    ): string {
-        let ret = "";
-
-        for (const controlName of Object.keys(mappingInUse)) {
-            if (uiName === mappingInUse[controlName].uiName) {
-                ret = controlName;
-                break;
-            } else {
-                ret = "unknown control name mapping";
-            }
-        }
-
-        return ret;
-    }
-
-    private static createButtonCallback(btnId: string): void {
-        console.error("TODO", "btn id CALLBACK MAPPING", btnId);
-    }
-
-    public static generateCallbackBasedOnUIName<P extends keyof CallbackMapping>(
-        uiName: UIInterfaceDeviceName
-    ): CallbackMapping[P] {
-        switch (uiName) {
-            case "volume_fader": {
-                return () => {
-                    console.error("todo VOLUME FADER MAPPING");
-                };
-            }
-            case "button_1_position": {
-                return () => {
-                    this.createButtonCallback("button id");
-                };
-            }
-            case "button_2_position": {
-                return () => {
-                    this.createButtonCallback("button id2");
-                };
-            }
-            default:
-                return (_midiIntensity: number) => void 0;
-        }
-    }
-
-    public static updatePreferenceMapping(
-        _this: MIDIMappingPreference<typeof name>,
-        name: MIDIInputName,
-        controlName: GenericControlName<typeof name>,
-        channel: number,
-        uiName: UIInterfaceDeviceName
-    ): MIDIMappingPreference<typeof name> {
-        // update this.mapping and this.callbackmap
-        let ret: typeof _this = {} as any;
-        Object.assign(ret, _this);
-        ret.mapping[controlName].channel = channel;
-        ret.mapping[controlName].uiName = uiName;
-
-        MIDIMappingPreference.setMIDICallbackMapBasedOnControllerName(ret);
-
-        return ret;
-    }
-
-    public static setMIDICallbackMapBasedOnControllerName(_this: MIDIMappingPreference<MIDIInputName>): void {
-        Object.keys(DEFAULT_CALLBACK_TABLE).forEach((uiName) => {
-            _this.callbackMap = {
-                ..._this.callbackMap,
-                [uiName]: MIDIMappingPreference.generateCallbackBasedOnUIName(uiName),
-            };
-        });
-    }
-
-    #setMIDIMappingBasedOnInputName(name: N): void {
-        switch (name) {
-            case "TouchOSC Bridge":
-                Object.keys(DEFAULT_TOUCHOSC_MAPPING_PREFERENCE_TABLE).forEach((key) => {
-                    this.mapping = {
-                        ...this.mapping,
-                        [key]: DEFAULT_TOUCHOSC_MAPPING_PREFERENCE_TABLE[key],
-                    };
-                });
-                break;
-            case "XONE:K2 MIDI":
-                Object.keys(DEFAULT_XONE_MAPPING_PREFERENCE_TABLE).forEach((key) => {
-                    this.mapping = {
-                        ...this.mapping,
-                        [key]: DEFAULT_XONE_MAPPING_PREFERENCE_TABLE[key],
-                    };
-                });
-                break;
-            default:
-                break;
-        }
-    }
+export interface IMIDIMappingPreference<N extends MIDIInputName> {
+    id: string;
+    name: N;
+    mapping: MIDIMapping<N>;
+    callbackMap: CallbackMapping;
 }
+

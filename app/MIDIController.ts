@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import { MIDIMapping, MIDIMappingPreference } from "./MIDIMapping.js";
+import { IMIDIMappingPreference } from "./MIDIMapping.js";
 
 /**
  * @see https://www.w3.org/TR/webmidi/#idl-def-MIDIPort
@@ -131,7 +131,7 @@ export interface IMIDIController {
     inputs_size: number;
     outputs_size: number;
     recentlyUsed: MIDIInputName;
-    allMIDIMappingPreferences: Record<MIDIInputName, MIDIMappingPreference<MIDIInputName>>;
+    allMIDIMappingPreferences: Record<MIDIInputName, IMIDIMappingPreference<MIDIInputName>>;
     outputs?: Array<MIDIOutput>;
     online?: boolean;
 }
@@ -589,7 +589,7 @@ export class MIDIController implements IMIDIController {
     public inputs_size = 0;
     public outputs_size = 0;
     public online = false;
-    public allMIDIMappingPreferences: Record<MIDIInputName, MIDIMappingPreference<MIDIInputName>> = {} as any;
+    public allMIDIMappingPreferences: Record<MIDIInputName, IMIDIMappingPreference<MIDIInputName>> = {} as any;
 
     public constructor(access: MIDIAccessRecord = null as any) {
         if (access) {

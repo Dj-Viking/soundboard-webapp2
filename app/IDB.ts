@@ -1,9 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { createButton } from "./Button.js";
 import { idb_dbName, idb_storeName, idb_version } from "./Constants.js";
-import { MIDIInputName } from "./MIDIController.js";
-import { MIDIMapping, MIDIMappingPreference } from "./MIDIMapping.js";
-import { Storage } from "./Storage.js";
 // make this the abstract class to make new idb helpers based on their type
 
 export function initButtonsIdb(): void {
