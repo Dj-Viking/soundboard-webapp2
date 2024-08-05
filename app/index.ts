@@ -6,13 +6,18 @@ import { WS_PORT } from "../common.js";
     const ws = new WebSocket(`ws://localhost:${WS_PORT}`)
     let buttonModule = await import("./Button.js");
     let styleModule = await import("./Styles.js");
-
+    let idbModule = await import("./IDB.js");
+    
+    // initialize indexed DB when the app starts
+    idbModule.initButtonsIdb()
+    
     ws.addEventListener("message", async (event) => {
         if (event.data.includes("hot")) {
             const timestamp = (Date.now()).toString();
             // switch()
             buttonModule = await import("./Button.js" + "?date=" + timestamp);
             styleModule = await import ("./Styles.js" + "?date=" + timestamp);
+            idbModule = await import("./IDB.js" + "?date=" + timestamp);
             renderApp(buttonModule, styleModule);
         }
     });
