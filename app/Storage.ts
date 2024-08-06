@@ -1,4 +1,4 @@
-import { Button } from "./Button.js";
+import { IButton } from "./Button.js";
 import { GenericControlName, MIDIInputName, UIInterfaceDeviceName } from "./MIDIController.js";
 import { IMIDIMappingPreference, createMIDIMappingPreference, setMIDICallbackMapBasedOnControllerName } from "./MIDIMapping.js";
 import * as idb from "./IDB.js";
@@ -51,13 +51,13 @@ export function updateMIDIMappingInStorage<T extends MIDIInputName>(
     return storageMapping;
 }
 
-export async function getStorageButtons(): Promise<Array<Button["props"]>> {
-    return new Promise<Array<Button["props"]>>((res) => {
+export async function getStorageButtons(): Promise<Array<IButton["props"]>> {
+    return new Promise<Array<IButton["props"]>>((res) => {
         (async () => {
             const result = await idb.idbContainsStoreName(idb_storeName, idb_dbName);
             if (result) {
                 const buttons = await idb.idb_getAll(idb_storeName, idb_dbName, idb_version);
-                res(buttons as Button["props"][]);
+                res(buttons as IButton["props"][]);
             } else {
                 res([]);
             }
@@ -81,5 +81,5 @@ export interface IStorage {
         channel: number,
         uiName: UIInterfaceDeviceName
     ): IMIDIMappingPreference<T>;
-    getStorageButtons(): Promise<Array<Button["props"]>>
+    getStorageButtons(): Promise<Array<IButton["props"]>>
 }

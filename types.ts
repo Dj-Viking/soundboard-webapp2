@@ -7,5 +7,9 @@ declare global {
     interface Navigator {
         requestMIDIAccess(): Promise<MIDIAccessRecord>;
     }
+
+    type KeyboardKey = "m" | "M" | "Alt" | "f" | "Control" | "Shift"
+
+    type KeyControlMap = Record<KeyboardKey, boolean>;
 }
 export {}

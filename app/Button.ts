@@ -1,11 +1,12 @@
 import { getRandomColor, getRandomId } from "../common.js";
+import { idb_dbName, idb_version } from "./Constants.js";
 
-export type ButtonProps = {
+export interface IButtonProps {
     id: string;
     color: string;
     file?: File | null;
 }
-export interface Button {
+export interface IButton {
     el: HTMLButtonElement,
     btnAssignmentSpan: HTMLSpanElement,
     audioEl: HTMLAudioElement,
@@ -15,15 +16,11 @@ export interface Button {
     hasAudioFile: boolean,
     isPlaying: boolean,
     file?: File | null,
-    props: {
-        id: string,
-        color: string,
-        file?: File | null,
-    }
+    props: IButtonProps
 }
 
-export function createButton(props: Partial<ButtonProps>): Button {
-    const button: Button = {} as any;
+export function createButton(props: Partial<IButtonProps>): IButton {
+    const button: IButton = {} as any;
     
     const id = props.id || getRandomId();
     const color = props.color || getRandomColor();
@@ -72,7 +69,7 @@ export function createButton(props: Partial<ButtonProps>): Button {
     return button;
 }
 
-export function setButtonProps(button: Button, props: ButtonProps): void {
+export function setButtonProps(button: IButton, props: IButtonProps): void {
     if (props.file) {
         const file = props.file
         button.filenameSpan.textContent = file.name;
@@ -89,7 +86,7 @@ export function setButtonProps(button: Button, props: ButtonProps): void {
     };
 }
 
-export function addFileToButton(button: Button, file: File): void {
+export function addFileToButton(button: IButton, file: File): void {
     const src = URL.createObjectURL(file);
     button.file = file;
     button.hasAudioFile = true;
@@ -109,3 +106,84 @@ export function addFileToButton(button: Button, file: File): void {
      */
     
 }
+
+export function clickInput (_this: IButton, keyCtrl: KeyControlMap): void {
+    _this.fileInputEl.click();
+    keyCtrl.f = false;
+};
+
+export function boardButtonClickHandler(
+    keyControl: KeyControlMap, 
+    btn: IButton, 
+    storageModule: typeof import("./Storage.js"), 
+    idbModule: typeof import("./IDB.js"),
+    soundboardContainer: HTMLDivElement,
+    isPlaying: boolean,
+    allButtons: Record<IButton["el"]["id"], IButton>,
+    currentlyPlayingButton: IButton | null,
+    volumeControlInput: HTMLInputElement
+): void {
+    switch (true) {
+        case keyControl.f:
+            {
+                (async () => {
+                    if (!btn.hasAudioFile) {
+                        clickInput(btn, keyControl);
+                    } else {
+                        await btn.audioEl.play();
+                    }
+                })();
+            }
+            break;
+        case keyControl.Control:
+            {
+                storageModule.getStorageButtons().then((btns) => {
+                    const toDelete = btns.find((sb) => sb.id === btn.el.id);
+                    idbModule.idb_delete(toDelete, idb_dbName, idb_version);
+                    soundboardContainer.removeChild(document.getElementById(btn.el.id)!);
+                });
+            }
+            break;
+        case Object.values(keyControl).every((pressedKey) => pressedKey === false):
+            {
+                if (btn.hasAudioFile) {
+                    (async () => {
+                        if (isPlaying) {
+                            Object.values(allButtons).forEach((_btn) => {
+                                if (_btn.audioEl.id !== btn.audioEl.id) {
+                                    _btn.audioEl.pause();
+                                    _btn.isPlaying = false;
+                                    _btn.audioEl.currentTime = 0;
+                                }
+                            });
+                        }
+                        if (!btn.isPlaying) {
+                            btn.isPlaying = true;
+                            isPlaying = true;
+                            currentlyPlayingButton = btn;
+                            btn.audioEl.volume = Number(volumeControlInput.value);
+                            setTimeout(async () => {
+                                volumeControlInput.oninput = (e) => {
+                                    // TODO: 
+                                    // this.handleVolumeChange(e, btn.audioEl);
+                                };
+                            }, 1);
+                            await btn.audioEl.play();
+                        } else {
+                            btn.audioEl.pause();
+                            // restart the track to the beginning
+                            btn.audioEl.currentTime = 0;
+                            setTimeout(async () => {
+                                await btn.audioEl.play();
+                            }, 1);
+                        }
+                    })();
+                }
+            }
+            break;
+        default:
+            {
+            }
+            break;
+    }
+};
