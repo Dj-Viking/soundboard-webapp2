@@ -67,69 +67,79 @@ function renderApp(
     uiModule: typeof import("./UI.js")
 ) {
     // HEAD //
-    uiModule.setupDocumentHead(stylesModule);
+    {
+        uiModule.setupDocumentHead(stylesModule);
+    }
     // HEAD //
 
     // TXT //
     const ctrlKeyMessageSpan = document.createElement("span");
-    ctrlKeyMessageSpan.innerText = "Control is pressed! - click a button to delete it";
-    ctrlKeyMessageSpan.style.color = "red";
-    ctrlKeyMessageSpan.style.visibility = "hidden";
-    ctrlKeyMessageSpan.style.fontWeight = "bold";
-    
     const fKeyMessageSpan = document.createElement("span");
-    fKeyMessageSpan.innerText = "F is Pressed! - click a button to upload an audio file onto it!";
-    fKeyMessageSpan.style.color = "blue";
-    fKeyMessageSpan.style.visibility = "hidden";
-    fKeyMessageSpan.style.fontWeight = "bold";
+    {
+        ctrlKeyMessageSpan.innerText = "Control is pressed! - click a button to delete it";
+        ctrlKeyMessageSpan.style.color = "red";
+        ctrlKeyMessageSpan.style.visibility = "hidden";
+        ctrlKeyMessageSpan.style.fontWeight = "bold";
+        
+        fKeyMessageSpan.innerText = "F is Pressed! - click a button to upload an audio file onto it!";
+        fKeyMessageSpan.style.color = "blue";
+        fKeyMessageSpan.style.visibility = "hidden";
+        fKeyMessageSpan.style.fontWeight = "bold";
+    }
     // TXT //
     
 
     // EVENTS //
-    uiModule.setupKeyListeners(fKeyMessageSpan, ctrlKeyMessageSpan, state);
+    {
+        uiModule.setupKeyListeners(fKeyMessageSpan, ctrlKeyMessageSpan, state);
+    }
     // EVENTS //
 
 
-    document.body.innerHTML = "";
-    const volumeControlInput: HTMLInputElement = uiModule.setupVolumeControlInput(state);
-    const stopButtonEl = document.createElement("button");
-
-    const soundboardContainer = uiModule.setupSoundboardContainer(buttonModule, storageModule, idbModule, volumeControlInput, stopButtonEl, state);
-
-    const buttonControlContainer = uiModule.setupButtonControlContainer(
-        buttonModule, 
-        idbModule, 
-        storageModule, 
-        soundboardContainer, 
-        volumeControlInput, 
-        stopButtonEl,
-        fKeyMessageSpan,
-        ctrlKeyMessageSpan,
-        state
-    );
+    // RENDERING //
+    {
+        document.body.innerHTML = "";
+        const volumeControlInput: HTMLInputElement = uiModule.setupVolumeControlInput(state);
+        const stopButtonEl = document.createElement("button");
+        
+        const soundboardContainer = uiModule.setupSoundboardContainer(buttonModule, storageModule, idbModule, volumeControlInput, stopButtonEl, state);
+        
+        const buttonControlContainer = uiModule.setupButtonControlContainer(
+            buttonModule, 
+            idbModule, 
+            storageModule, 
+            soundboardContainer, 
+            volumeControlInput, 
+            stopButtonEl,
+            fKeyMessageSpan,
+            ctrlKeyMessageSpan,
+            state
+        );
+        // render into document body
+        document.body.append(buttonControlContainer, soundboardContainer);
+    }
+    // RENDERING //
     
-    // render into document body
-    document.body.append(buttonControlContainer, soundboardContainer);
-}
+    
+    // TODO: 
+    // private handleMIDIEditModeButtonClick = (): void => {
+    //     this.isMIDIEdit = !this.isMIDIEdit;
+    //     if (this.isMIDIEdit) {
+    //         this.midiDeviceDisplay.showAssignmentSpans();
+    //         this.toggleMIDIEditModeButton.textContent = "MIDI Mapping Edit Mode ON";
+    //         this.toggleMIDIEditModeButton.style.backgroundColor = "green";
+    //     } else {
+    //         this.midiDeviceDisplay.hideAssignmentSpans();
+    //         this.toggleMIDIEditModeButton.textContent = "MIDI Mapping Edit Mode OFF";
+    //         this.toggleMIDIEditModeButton.style.backgroundColor = "grey";
+    //     }
+    // };
+
+    }    
+    // function refreshTrackProgress(audioEl: Button["audioEl"]): void {
+
 
 // TODO: 
-// private handleMIDIEditModeButtonClick = (): void => {
-//     this.isMIDIEdit = !this.isMIDIEdit;
-//     if (this.isMIDIEdit) {
-//         this.midiDeviceDisplay.showAssignmentSpans();
-//         this.toggleMIDIEditModeButton.textContent = "MIDI Mapping Edit Mode ON";
-//         this.toggleMIDIEditModeButton.style.backgroundColor = "green";
-//     } else {
-//         this.midiDeviceDisplay.hideAssignmentSpans();
-//         this.toggleMIDIEditModeButton.textContent = "MIDI Mapping Edit Mode OFF";
-//         this.toggleMIDIEditModeButton.style.backgroundColor = "grey";
-//     }
-// };
-
-
-
-// TODO: 
-// function refreshTrackProgress(audioEl: Button["audioEl"]): void {
 //     this.trackTimeTextSpan.textContent = `${this.convertTime(audioEl.currentTime)} -- ${this.convertTime(
 //         audioEl.duration
 //     )}`;
