@@ -224,3 +224,26 @@ export function createFKeyMessageSpan () {
 
     return span;
 }
+
+// TODO: 
+// private handleMIDIEditModeButtonClick = (): void => {
+//     this.isMIDIEdit = !this.isMIDIEdit;
+//     if (this.isMIDIEdit) {
+//         this.midiDeviceDisplay.showAssignmentSpans();
+//         this.toggleMIDIEditModeButton.textContent = "MIDI Mapping Edit Mode ON";
+//         this.toggleMIDIEditModeButton.style.backgroundColor = "green";
+//     } else {
+//         this.midiDeviceDisplay.hideAssignmentSpans();
+//         this.toggleMIDIEditModeButton.textContent = "MIDI Mapping Edit Mode OFF";
+//         this.toggleMIDIEditModeButton.style.backgroundColor = "grey";
+//     }
+// };
+// TODO: 
+// function refreshTrackProgress(audioEl: Button["audioEl"]): void {
+//     this.trackTimeTextSpan.textContent = `${this.convertTime(audioEl.currentTime)} -- ${this.convertTime(
+//         audioEl.duration
+//     )}`;
+
+//     this.trackProgressBar.max = audioEl.duration;
+//     this.trackProgressBar.value = audioEl.currentTime;
+// }
