@@ -1,8 +1,3 @@
-// TODO: move all things that deal with
-// DOM into here
-// and just call them within the entrypoint "render" function
-
-// buttonControlContainer, soundboardContainer
 
 export function setupDocumentHead(styles: typeof import("./Styles.js")): void {
     const title = document.createElement("title");
@@ -208,4 +203,24 @@ export function setupVolumeControlInput(
         }
     }
     return input;
+}
+
+export function createCtrlKeyMessageSpan () {
+    const span = document.createElement("span");
+    span.innerText = "Control is pressed! - click a button to delete it";
+    span.style.color = "red";
+    span.style.visibility = "hidden";
+    span.style.fontWeight = "bold";
+
+    return span;
+}
+export function createFKeyMessageSpan () {
+    const span = document.createElement("span");
+
+    span.innerText = "F is Pressed! - click a button to upload an audio file onto it!";
+    span.style.color = "blue";
+    span.style.visibility = "hidden";
+    span.style.fontWeight = "bold";
+
+    return span;
 }

@@ -73,19 +73,8 @@ function renderApp(
     // HEAD //
 
     // TXT //
-    const ctrlKeyMessageSpan = document.createElement("span");
-    const fKeyMessageSpan = document.createElement("span");
-    {
-        ctrlKeyMessageSpan.innerText = "Control is pressed! - click a button to delete it";
-        ctrlKeyMessageSpan.style.color = "red";
-        ctrlKeyMessageSpan.style.visibility = "hidden";
-        ctrlKeyMessageSpan.style.fontWeight = "bold";
-        
-        fKeyMessageSpan.innerText = "F is Pressed! - click a button to upload an audio file onto it!";
-        fKeyMessageSpan.style.color = "blue";
-        fKeyMessageSpan.style.visibility = "hidden";
-        fKeyMessageSpan.style.fontWeight = "bold";
-    }
+    const ctrlKeyMessageSpan = uiModule.createCtrlKeyMessageSpan();
+    const fKeyMessageSpan = uiModule.createFKeyMessageSpan();
     // TXT //
     
 
