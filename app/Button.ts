@@ -91,8 +91,6 @@ export function createButton(props: Partial<IButtonProps>, idbModule: typeof imp
     return button;
 }
 
-
-
 export function setButtonProps(button: IButton, props: IButtonProps): void {
     if (props.file) {
         const file = props.file
