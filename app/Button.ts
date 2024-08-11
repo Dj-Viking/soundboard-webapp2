@@ -76,7 +76,6 @@ export function createButton(props: Partial<IButtonProps>, idbModule: typeof imp
     button.fileInputEl.addEventListener("change", () => {
         if (button.fileInputEl.files?.length === 1) {
             const file = button.fileInputEl.files?.item(0)!;
-            addFileToButton(button, file)
             addAudioSrcToButton(button, file, idbModule);
         }
     });
@@ -90,6 +89,31 @@ export function createButton(props: Partial<IButtonProps>, idbModule: typeof imp
     button.el.style.backgroundColor = button.color;
 
     return button;
+}
+
+
+
+export function setButtonProps(button: IButton, props: IButtonProps): void {
+    if (props.file) {
+        const file = props.file
+        button.filenameSpan.textContent = file.name;
+
+        // could be calling this function several times.
+        // don't want to keep prepending children if we don't have to
+        if (button.el.children.length === 0) {
+            button.el.prepend(button.filenameSpan);
+            button.el.style.width = "auto";
+        }
+        
+        button.hasAudioFile = true;
+        button.audioEl.src = URL.createObjectURL(file);
+    }
+    button.props = {
+        ...button.props,
+        id: props.id,
+        color: props.color,
+        file: props.file || null
+    };
 }
 
 export function addAudioSrcToButton(button: IButton, file: File, idbModule: typeof import("./IDB.js")): void {
@@ -110,52 +134,6 @@ export function addAudioSrcToButton(button: IButton, file: File, idbModule: type
     });
 
     idbModule.idb_update(button.props, idbModule);
-}
-
-export function setButtonProps(button: IButton, props: IButtonProps): void {
-    if (props.file) {
-        const file = props.file
-        button.filenameSpan.textContent = file.name;
-
-        // could be calling this function several times.
-        // don't want to keep prepending children if we don't have to
-        if (button.el.children.length === 0) {
-            button.el.prepend(button.filenameSpan);
-            button.el.style.width = "auto";
-        }
-        
-        if (!button.hasAudioFile) {
-            button.hasAudioFile = true;
-            button.audioEl.src = URL.createObjectURL(file);
-        }
-    }
-    button.props = {
-        ...button.props,
-        id: props.id,
-        color: props.color,
-        file: props.file || null
-    };
-}
-
-export function addFileToButton(button: IButton, file: File): void {
-    const src = URL.createObjectURL(file);
-    button.file = file;
-    button.hasAudioFile = true;
-    button.audioEl.src = src;
-
-    button.filenameSpan.textContent = file.name;
-    button.el.style.width = "auto";
-    button.el.prepend(button.filenameSpan);
-    button.props = {
-        ...button.props,
-        file,
-    }
-
-    /**
-     * update idb button collection
-     * with the new button props as a new item in the collection
-     */
-    
 }
 
 export function clickInput (_this: IButton, keyCtrl: KeyControlMap): void {
