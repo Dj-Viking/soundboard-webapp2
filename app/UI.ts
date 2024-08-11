@@ -24,7 +24,7 @@ export function setupSoundboardContainer(
     // TODO: create button list from buttons inside
     // indexedDB and append to soundboardContainer
     storageModule.getStorageButtons().then((strgeBtns) => {
-        const btns = strgeBtns.map((props) => buttonModule.createButton(props));
+        const btns = strgeBtns.map((props) => buttonModule.createButton(props, idbModule));
 
         btns.forEach((btn) => {
             btn.el.addEventListener("click", (_e) => {
@@ -84,7 +84,7 @@ export function setupButtonControlContainer(
     addButtonEl.innerText = "Add A New Button +";
     addButtonEl.onclick = (_event: MouseEvent) => {
         storage.getStorageButtons().then((storageButtons): void => {
-            const btn = buttonModule.createButton({});
+            const btn = buttonModule.createButton(buttonModule.initialButton({}), idbModule);
             idbModule.idb_put(btn.props);
             storageButtons.push(btn.props);
             btn.el.onclick = () => {

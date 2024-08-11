@@ -78,7 +78,7 @@ export function idb_put(item: any) {
         });
     });
 }
-export function idb_update(item: any) {
+export function idb_update(item: any, idbModule: any) {
     return new Promise<void>((res) => {
         openConnection(idb_dbName, idb_version).then((req) => {
             req.onsuccess = () => {
@@ -89,7 +89,7 @@ export function idb_update(item: any) {
                         if (itemsReq.result.length > 0) {
                             const filtered = itemsReq.result
                                 .filter((props) => props.id === item.id)
-                                .map((props) => createButton(props));
+                                .map((props) => createButton(props, idbModule));
 
                             const btnToUpdate = filtered.find((btn) => btn.el.id === item.id)!;
 

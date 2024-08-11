@@ -19,64 +19,115 @@ export interface IButton {
     props: IButtonProps
 }
 
-export function createButton(props: Partial<IButtonProps>): IButton {
-    const button: IButton = {} as any;
+export function initialButton(props: Partial<IButton["props"]>): IButton {
+    const btn: IButton = {} as any;
     
-    const id = props.id || getRandomId();
-    const color = props.color || getRandomColor();
-    let file = props.file || null;
+    btn.el = document.createElement("button");
+    btn.el.id = props.id ?? getRandomId();
+    btn.el.classList.add("soundboard-button");
+    
+    btn.btnAssignmentSpan = document.createElement("span");
+    
+    btn.audioEl = document.createElement("audio");
+    
+    btn.fileInputEl = document.createElement("input");
+    btn.fileInputEl.type = "file";
+    btn.fileInputEl.style.display = "none";
+    btn.fileInputEl.accept = ".mp3,wav";
+    btn.fileInputEl.id = getRandomId();
+    
+    btn.filenameSpan = document.createElement("span");
+    btn.filenameSpan.textContent = props.file ? props.file.name : "";
 
-    const el = document.createElement("button");
-    el.id = id!;
-    el.classList.add("soundboard-button");
+    btn.color = props.color ?? getRandomColor();
+    
+    btn.hasAudioFile = props.file ? true : false;
+    
+    btn.isPlaying = false;
+    
+    btn.file = props.file ?? null;
+    
+    setButtonProps(btn, {
+        "color": btn.color,
+        "id": btn.el.id,
+        "file": btn.file
+    })
 
-    const btnAssignmentSpan = document.createElement("button");
-    btnAssignmentSpan.id = getRandomId();
+    return btn;
+}
 
-    const audioEl = document.createElement("audio");
-    audioEl.id = getRandomId();
+export function createButton(props: Partial<IButtonProps>, idbModule: typeof import("./IDB.js")): IButton {
+    const button: IButton = initialButton(props);
+    
+    button.btnAssignmentSpan.id = getRandomId();
 
-    const filenameSpan =  document.createElement("span");
-    filenameSpan.id = getRandomId();
+    button.audioEl.id = getRandomId();
+    button.audioEl.style.display = "none";
+    button.el.appendChild(button.audioEl);
 
-    const fileInputEl = document.createElement("input");
-    fileInputEl.type = "file";
-    fileInputEl.style.display = "none";
-    fileInputEl.accept = ".mp3,wav";
-    fileInputEl.id = getRandomId();
+    button.filenameSpan.id = getRandomId();
 
-    fileInputEl.addEventListener("change", () => {
-        if (fileInputEl.files?.length === 1) {
-            const file = fileInputEl.files?.item(0)!;
+    button.fileInputEl.type = "file";
+    button.fileInputEl.style.display = "none";
+    button.fileInputEl.accept = ".mp3,wav";
+    button.fileInputEl.id = getRandomId();
+    button.el.append(button.fileInputEl);
+
+    button.fileInputEl.addEventListener("change", () => {
+        if (button.fileInputEl.files?.length === 1) {
+            const file = button.fileInputEl.files?.item(0)!;
             addFileToButton(button, file)
+            addAudioSrcToButton(button, file, idbModule);
         }
     });
 
     setButtonProps(button, {
-        id,
-        color,
-        file
+        id: button.el.id,
+        color: button.color,
+        file: button.file
     });
-    button.el = el;
-    button.btnAssignmentSpan = btnAssignmentSpan;
-    button.audioEl = audioEl;
-    button.fileInputEl = fileInputEl;
-    button.filenameSpan = filenameSpan;
-    button.color = color;
-    button.el.style.backgroundColor = color;
-    button.hasAudioFile = false;
+
+    button.el.style.backgroundColor = button.color;
 
     return button;
+}
+
+export function addAudioSrcToButton(button: IButton, file: File, idbModule: typeof import("./IDB.js")): void {
+    const src = window.URL.createObjectURL(file); // temporary base 64 string
+    
+    button.filenameSpan.textContent = file.name;
+    button.el.style.width = "auto";
+    button.el.prepend(button.filenameSpan);
+
+    button.file = file;
+
+    button.audioEl.src = src;
+    button.hasAudioFile = true;
+
+    setButtonProps(button, {
+        ...button.props,
+        file
+    });
+
+    idbModule.idb_update(button.props, idbModule);
 }
 
 export function setButtonProps(button: IButton, props: IButtonProps): void {
     if (props.file) {
         const file = props.file
         button.filenameSpan.textContent = file.name;
-        button.el.prepend(button.filenameSpan);
-        button.el.style.width = "auto";
-        button.hasAudioFile = true;
-        button.audioEl.src = URL.createObjectURL(file);
+
+        // could be calling this function several times.
+        // don't want to keep prepending children if we don't have to
+        if (button.el.children.length === 0) {
+            button.el.prepend(button.filenameSpan);
+            button.el.style.width = "auto";
+        }
+        
+        if (!button.hasAudioFile) {
+            button.hasAudioFile = true;
+            button.audioEl.src = URL.createObjectURL(file);
+        }
     }
     button.props = {
         ...button.props,
