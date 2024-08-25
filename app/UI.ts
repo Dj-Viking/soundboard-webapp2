@@ -115,17 +115,6 @@ export function setupButtonControlContainer(
         });
     }
 
-    /**
-     * TODO
-        this.btnControlContainer.append(
-            this.addButtonEl,
-            this.stopButtonEl,
-            this.trackProgressBar,
-            this.trackTimeTextSpan,
-            this.ctrlKeyMessageSpan,
-            this.fKeyMessageSpan
-        );
-     */
     buttonControlContainer.append(
         addButtonEl,
         stopButtonEl,
