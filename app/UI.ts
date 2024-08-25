@@ -1,3 +1,5 @@
+import { state } from "./App.js";
+import { IButton } from "./Button.js";
 
 export function setupDocumentHead(styles: typeof import("./Styles.js")): void {
     const title = document.createElement("title");
@@ -29,14 +31,11 @@ export function setupSoundboardContainer(
         btns.forEach((btn) => {
             btn.el.addEventListener("click", (_e) => {
                 buttonModule.boardButtonClickHandler(
-                    state.keyControl, 
+                    state, 
                     btn, 
                     storageModule, 
                     idbModule, 
                     soundboardContainer, 
-                    state.isPlaying, 
-                    state.allButtons, 
-                    state.currentlyPlayingButton, 
                     volumeControlInput
                 );
             });
@@ -67,7 +66,11 @@ export function setupButtonControlContainer(
     fKeyMessageSpan: HTMLSpanElement,
     ctrlKeyMessageSpan: HTMLSpanElement,
     state: State
-) {
+): {
+    buttonControlContainer: HTMLDivElement,
+    trackProgressBar: HTMLProgressElement,
+    trackTimeTextSpan: HTMLSpanElement,
+} {
     const buttonControlContainer = document.createElement("div");
     buttonControlContainer.classList.add("btn-control-container");
 
@@ -75,9 +78,10 @@ export function setupButtonControlContainer(
 
     const trackProgressBar = document.createElement("progress");
     trackProgressBar.classList.add("track-progress");
-    trackProgressBar.textContent = "00:00:00 -- 00:00:00";
-    trackProgressBar.style.color = "white";
-
+    
+    const trackTimeTextSpan = document.createElement("span");
+    trackTimeTextSpan.textContent = "00:00:00 -- 00:00:00";
+    trackTimeTextSpan.style.color = "white";
 
     const addButtonEl = document.createElement("button");
     addButtonEl.classList.add("board-button");
@@ -88,14 +92,12 @@ export function setupButtonControlContainer(
             idbModule.idb_put(btn.props);
             storageButtons.push(btn.props);
             btn.el.onclick = () => {
-                buttonModule.boardButtonClickHandler(state.keyControl, 
+                buttonModule.boardButtonClickHandler(
+                    state, 
                     btn, 
                     storage, 
                     idbModule, 
                     soundboardContainer, 
-                    state.isPlaying, 
-                    state.allButtons, 
-                    state.currentlyPlayingButton, 
                     volumeControlInput
                 );
             };
@@ -128,10 +130,15 @@ export function setupButtonControlContainer(
         addButtonEl,
         stopButtonEl,
         trackProgressBar,
+        trackTimeTextSpan,
         fKeyMessageSpan,
         ctrlKeyMessageSpan
     );
-    return buttonControlContainer;
+    return { 
+        buttonControlContainer,
+        trackProgressBar,
+        trackTimeTextSpan
+    };
 }
 
 
@@ -238,12 +245,38 @@ export function createFKeyMessageSpan () {
 //         this.toggleMIDIEditModeButton.style.backgroundColor = "grey";
 //     }
 // };
-// TODO: 
-// function refreshTrackProgress(audioEl: Button["audioEl"]): void {
-//     this.trackTimeTextSpan.textContent = `${this.convertTime(audioEl.currentTime)} -- ${this.convertTime(
-//         audioEl.duration
-//     )}`;
 
-//     this.trackProgressBar.max = audioEl.duration;
-//     this.trackProgressBar.value = audioEl.currentTime;
-// }
+export function refreshTrackProgress(
+    trackProgressBar: HTMLProgressElement, 
+    audioEl: IButton["audioEl"],
+    trackTimeTextSpan: HTMLSpanElement
+): void {
+    trackTimeTextSpan.textContent = `\
+    ${convertTime(audioEl.currentTime)} \
+    -- \
+    ${convertTime(audioEl.duration)}`;
+
+    trackProgressBar.max = audioEl.duration;
+    trackProgressBar.value = audioEl.currentTime;
+}
+
+export function convertTime(secs: number = 0): string {
+    const date = new Date(0);
+    date.setSeconds(secs);
+    const timeString = date.toISOString().substring(11, 19);
+    return timeString;
+}
+
+export function handleAnimate(
+    trackProgressBar: HTMLProgressElement,
+    state: State,
+    trackTimeTextSpan: HTMLSpanElement
+) {
+    if (state.isPlaying) {
+        refreshTrackProgress(
+            trackProgressBar, state.currentlyPlayingButton!.audioEl, trackTimeTextSpan
+        )
+    }
+}
+
+

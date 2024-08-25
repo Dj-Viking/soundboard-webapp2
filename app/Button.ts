@@ -140,29 +140,26 @@ export function clickInput (_this: IButton, keyCtrl: KeyControlMap): void {
 };
 
 export function boardButtonClickHandler(
-    keyControl: KeyControlMap, 
+    state: State, 
     btn: IButton, 
     storageModule: typeof import("./Storage.js"), 
     idbModule: typeof import("./IDB.js"),
     soundboardContainer: HTMLDivElement,
-    isPlaying: boolean,
-    allButtons: Record<IButton["el"]["id"], IButton>,
-    currentlyPlayingButton: IButton | null,
     volumeControlInput: HTMLInputElement
 ): void {
     switch (true) {
-        case keyControl.f:
+        case state.keyControl.f:
             {
                 (async () => {
                     if (!btn.hasAudioFile) {
-                        clickInput(btn, keyControl);
+                        clickInput(btn, state.keyControl);
                     } else {
                         await btn.audioEl.play();
                     }
                 })();
             }
             break;
-        case keyControl.Control:
+        case state.keyControl.Control:
             {
                 storageModule.getStorageButtons().then((btns) => {
                     const toDelete = btns.find((sb) => sb.id === btn.el.id);
@@ -171,12 +168,12 @@ export function boardButtonClickHandler(
                 });
             }
             break;
-        case Object.values(keyControl).every((pressedKey) => pressedKey === false):
+        case Object.values(state.keyControl).every((pressedKey) => pressedKey === false):
             {
                 if (btn.hasAudioFile) {
                     (async () => {
-                        if (isPlaying) {
-                            Object.values(allButtons).forEach((_btn) => {
+                        if (state.isPlaying) {
+                            Object.values(state.allButtons).forEach((_btn) => {
                                 if (_btn.audioEl.id !== btn.audioEl.id) {
                                     _btn.audioEl.pause();
                                     _btn.isPlaying = false;
@@ -186,8 +183,8 @@ export function boardButtonClickHandler(
                         }
                         if (!btn.isPlaying) {
                             btn.isPlaying = true;
-                            isPlaying = true;
-                            currentlyPlayingButton = btn;
+                            state.isPlaying = true;
+                            state.currentlyPlayingButton = btn;
                             btn.audioEl.volume = Number(volumeControlInput.value);
                             setTimeout(async () => {
                                 volumeControlInput.oninput = (e) => {

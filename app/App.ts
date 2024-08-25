@@ -51,26 +51,43 @@ export function renderApp(
 
 
     // RENDERING //
-    {
-        document.body.innerHTML = "";
-        const volumeControlInput: HTMLInputElement = uiModule.setupVolumeControlInput(state);
-        const stopButtonEl = document.createElement("button");
-        
-        const soundboardContainer = uiModule.setupSoundboardContainer(buttonModule, storageModule, idbModule, volumeControlInput, stopButtonEl, state);
-        
-        const buttonControlContainer = uiModule.setupButtonControlContainer(
-            buttonModule, 
-            idbModule, 
-            storageModule, 
-            soundboardContainer, 
-            volumeControlInput, 
-            stopButtonEl,
-            fKeyMessageSpan,
-            ctrlKeyMessageSpan,
-            state
-        );
-        // render into document body
-        document.body.append(buttonControlContainer, soundboardContainer);
-    }
+    
+    document.body.innerHTML = "";
+    const volumeControlInput: HTMLInputElement = uiModule.setupVolumeControlInput(state);
+    const stopButtonEl = document.createElement("button");
+    
+    const soundboardContainer = uiModule.setupSoundboardContainer(buttonModule, storageModule, idbModule, volumeControlInput, stopButtonEl, state);
+    
+    const { 
+        buttonControlContainer,
+        trackTimeTextSpan,
+        trackProgressBar
+    } = uiModule.setupButtonControlContainer(
+        buttonModule, 
+        idbModule, 
+        storageModule, 
+        soundboardContainer, 
+        volumeControlInput, 
+        stopButtonEl,
+        fKeyMessageSpan,
+        ctrlKeyMessageSpan,
+        state
+    );
+    // render into document body
+    document.body.append(buttonControlContainer, soundboardContainer);
+    
     // RENDERING //
+
+    // RAF
+    function animate(_timestamp?: number) {
+        uiModule.handleAnimate(
+            trackProgressBar,
+            state,
+            trackTimeTextSpan
+        )
+        window.requestAnimationFrame(animate);
+    }
+    window.requestAnimationFrame(animate);
+    // RAF
+
 }
