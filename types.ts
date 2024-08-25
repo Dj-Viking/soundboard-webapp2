@@ -2,6 +2,12 @@ import type { MIDIAccessRecord, MIDIController, MIDIInputName, UIInterfaceDevice
 import type { IButton } from "./app/Button.js"
 import type { IMIDIMappingPreference } from "./app/MIDIMapping.js";
 declare global {
+    interface MyEvent extends Event {
+        readonly target: EventTarget
+    }
+    interface EventTarget {
+        value: any
+    }
     interface ObjectConstructor {
         keys<T extends object, K extends keyof T = keyof T>(o: T): Array<K>; 
     }

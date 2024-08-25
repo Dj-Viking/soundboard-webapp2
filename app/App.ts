@@ -25,6 +25,7 @@ export const state: State = {
 
 
 export function renderApp(
+    appModule: typeof import("./App.js"),
     buttonModule: typeof import("./Button.js"),
     stylesModule: typeof import("./Styles.js"),
     idbModule: typeof import("./IDB.js"),
@@ -45,33 +46,46 @@ export function renderApp(
 
     // EVENTS //
     {
-        uiModule.setupKeyListeners(fKeyMessageSpan, ctrlKeyMessageSpan, state);
+        uiModule.setupKeyListeners(appModule, fKeyMessageSpan, ctrlKeyMessageSpan);
     }
     // EVENTS //
 
 
     // RENDERING //
-    
     document.body.innerHTML = "";
-    const volumeControlInput: HTMLInputElement = uiModule.setupVolumeControlInput(state);
+    const volumeControlInput: HTMLInputElement = uiModule.setupVolumeControlInput(
+        appModule,
+    );
+    const volumeInputText = uiModule.setupVolumeInputText(volumeControlInput);
     const stopButtonEl = document.createElement("button");
     
-    const soundboardContainer = uiModule.setupSoundboardContainer(buttonModule, storageModule, idbModule, volumeControlInput, stopButtonEl, state);
+    const soundboardContainer = uiModule.setupSoundboardContainer(
+        appModule,
+        uiModule,
+        buttonModule,
+        storageModule,
+        idbModule,
+        volumeControlInput,
+        volumeInputText,
+        stopButtonEl,
+    );
     
     const { 
         buttonControlContainer,
         trackTimeTextSpan,
         trackProgressBar
     } = uiModule.setupButtonControlContainer(
+        appModule,
+        uiModule,
         buttonModule, 
         idbModule, 
         storageModule, 
         soundboardContainer, 
-        volumeControlInput, 
+        volumeControlInput,
+        volumeInputText,
         stopButtonEl,
         fKeyMessageSpan,
         ctrlKeyMessageSpan,
-        state
     );
     // render into document body
     document.body.append(buttonControlContainer, soundboardContainer);
@@ -81,8 +95,9 @@ export function renderApp(
     // RAF
     function animate(_timestamp?: number) {
         uiModule.handleAnimate(
+            appModule,
+            uiModule,
             trackProgressBar,
-            state,
             trackTimeTextSpan
         )
         window.requestAnimationFrame(animate);

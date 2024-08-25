@@ -1,4 +1,3 @@
-import { state } from "./App.js";
 import { IButton } from "./Button.js";
 
 export function setupDocumentHead(styles: typeof import("./Styles.js")): void {
@@ -12,13 +11,27 @@ export function setupDocumentHead(styles: typeof import("./Styles.js")): void {
     document.head.append(title, styles.createStyles());
 }
 
+export function setupVolumeInputText(
+    volumeControlInput: HTMLInputElement
+): HTMLSpanElement {
+    const span = document.createElement("span");
+
+    span.textContent = `Volume: ${volumeControlInput.value}`;
+    span.style.fontSize = "20px";
+    span.style.color = "white";
+
+    return span;
+}
+
 export function setupSoundboardContainer(
+    appModule: typeof import("./App.js"),
+    uiModule: typeof import("./UI.js"),
     buttonModule: typeof import("./Button.js"),
     storageModule: typeof import("./Storage.js"),
     idbModule: typeof import("./IDB.js"),
     volumeControlInput: HTMLInputElement,
+    volumeInputText: HTMLSpanElement,
     stopButtonEl: HTMLButtonElement,
-    state: State
 ): HTMLDivElement {
     const soundboardContainer = document.createElement("div");
     soundboardContainer.classList.add("soundboard-container");
@@ -31,15 +44,17 @@ export function setupSoundboardContainer(
         btns.forEach((btn) => {
             btn.el.addEventListener("click", (_e) => {
                 buttonModule.boardButtonClickHandler(
-                    state, 
-                    btn, 
+                    appModule,
+                    uiModule,
                     storageModule, 
                     idbModule, 
+                    btn, 
                     soundboardContainer, 
-                    volumeControlInput
+                    volumeControlInput,
+                    volumeInputText
                 );
             });
-            state.allButtons[btn.el.id] = btn;
+            appModule.state.allButtons[btn.el.id] = btn;
             soundboardContainer.appendChild(btn.el);
         });
 
@@ -48,8 +63,8 @@ export function setupSoundboardContainer(
                 b.audioEl.currentTime = 0;
                 b.audioEl.pause();
                 b.isPlaying = false;
-                state.isPlaying = false;
-                state.currentlyPlayingButton = null;
+                appModule.state.isPlaying = false;
+                appModule.state.currentlyPlayingButton = null;
             });
         };
     });
@@ -57,15 +72,17 @@ export function setupSoundboardContainer(
 }
 
 export function setupButtonControlContainer(
+    appModule: typeof import("./App.js"),
+    uiModule: typeof import("./UI.js"),
     buttonModule: typeof import("./Button.js"),
     idbModule: typeof import("./IDB.js"),
     storage: typeof import("./Storage.js"),
     soundboardContainer: HTMLDivElement,
-    volumeControlInput: HTMLInputElement, 
+    volumeControlInput: HTMLInputElement,
+    volumeInputText: HTMLSpanElement,
     stopButtonEl: HTMLButtonElement,
     fKeyMessageSpan: HTMLSpanElement,
     ctrlKeyMessageSpan: HTMLSpanElement,
-    state: State
 ): {
     buttonControlContainer: HTMLDivElement,
     trackProgressBar: HTMLProgressElement,
@@ -93,22 +110,24 @@ export function setupButtonControlContainer(
             storageButtons.push(btn.props);
             btn.el.onclick = () => {
                 buttonModule.boardButtonClickHandler(
-                    state, 
-                    btn, 
+                    appModule,
+                    uiModule,
                     storage, 
                     idbModule, 
+                    btn, 
                     soundboardContainer, 
-                    volumeControlInput
+                    volumeControlInput,
+                    volumeInputText
                 );
             };
-            state.allButtons[btn.el.id] = btn;
+            appModule.state.allButtons[btn.el.id] = btn;
             stopButtonEl.onclick = () => {
-                Object.values(state.allButtons).forEach((b) => {
+                Object.values(appModule.state.allButtons).forEach((b) => {
                     b.audioEl.currentTime = 0;
                     b.audioEl.pause();
                     b.isPlaying = false;
-                    state.isPlaying = false;
-                    state.currentlyPlayingButton = null;
+                    appModule.state.isPlaying = false;
+                    appModule.state.currentlyPlayingButton = null;
                 });
             };
             soundboardContainer.appendChild(btn.el);
@@ -116,6 +135,8 @@ export function setupButtonControlContainer(
     }
 
     buttonControlContainer.append(
+        volumeControlInput,
+        volumeInputText,
         addButtonEl,
         stopButtonEl,
         trackProgressBar,
@@ -132,13 +153,13 @@ export function setupButtonControlContainer(
 
 
 export function setupKeyListeners(
+    appModule: typeof import("./App.js"),
     fKeyMessageSpan: HTMLSpanElement,
     ctrlKeyMessageSpan: HTMLSpanElement,
-    state: State
 ) {
     
     document.onkeyup = () => {
-        state.keyControl = {
+        appModule.state.keyControl = {
             m: false,
             M: false,
             Alt: false,
@@ -151,8 +172,8 @@ export function setupKeyListeners(
     }
 
     document.onkeydown = (event) => {
-        state.keyControl = {
-            ...state.keyControl,
+        appModule.state.keyControl = {
+            ...appModule.state.keyControl,
             [event.key]: true,
         };
         switch (true) {
@@ -180,8 +201,17 @@ export function setupKeyListeners(
     }
 }
 
+export function handleVolumeChange(
+    e: MyEvent, 
+    volumeInputText: HTMLSpanElement,
+    audioEl: HTMLAudioElement
+) {
+    volumeInputText.textContent = `Volume: ${e.target.value}`;
+    audioEl.volume = e.target.value;
+}
+
 export function setupVolumeControlInput(
-    state: State
+    appModule: typeof import("./App.js"),
 ): HTMLInputElement {
     const input = document.createElement("input");
     input.type = "range";
@@ -190,10 +220,10 @@ export function setupVolumeControlInput(
     input.step = ".001";
     input.value = ".5";
     input.onclick = () => {
-        if (state.isMIDIEdit) {
-            state.isListeningForMIDIMappingEdits = true;
+        if (appModule.state.isMIDIEdit) {
+            appModule.state.isListeningForMIDIMappingEdits = true;
             console.log("listening for edits on volume input");
-            state.mappingEditOptions = {
+            appModule.state.mappingEditOptions = {
                 uiName: "volume_fader",
             };
         }
@@ -257,13 +287,16 @@ export function convertTime(secs: number = 0): string {
 }
 
 export function handleAnimate(
+    appModule: typeof import("./App.js"),
+    uiModule: typeof import("./UI.js"),
     trackProgressBar: HTMLProgressElement,
-    state: State,
     trackTimeTextSpan: HTMLSpanElement
 ) {
-    if (state.isPlaying) {
-        refreshTrackProgress(
-            trackProgressBar, state.currentlyPlayingButton!.audioEl, trackTimeTextSpan
+    if (appModule.state.isPlaying) {
+        uiModule.refreshTrackProgress(
+            trackProgressBar,
+            appModule.state.currentlyPlayingButton!.audioEl,
+            trackTimeTextSpan
         )
     }
 }

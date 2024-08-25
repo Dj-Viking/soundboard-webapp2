@@ -31,11 +31,25 @@ console.log("hello world");
             // could just export all the functions used
             // in rendering the app so that everything happening there is dynamically
             // loaded
-            appModule.renderApp(buttonModule, styleModule, idbModule, storageModule, uiModule);
+            appModule.renderApp(
+                appModule,
+                buttonModule,
+                styleModule,
+                idbModule,
+                storageModule,
+                uiModule
+            );
         }
     });
     
-    appModule.renderApp(buttonModule, styleModule, idbModule, storageModule, uiModule);
+    appModule.renderApp(
+        appModule,
+        buttonModule,
+        styleModule,
+        idbModule,
+        storageModule,
+        uiModule
+    );
 
 })();
 
