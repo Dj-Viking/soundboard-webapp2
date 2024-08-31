@@ -39,7 +39,7 @@ export function translateKnobRect(
     return `rotate(${angle}, ${vec2.x}, ${vec2.y})`;
 }
 
-export function moveSvgFromMessage(
+export function moveKnobSvgFromMessage(
     svgModule: typeof import("./SVG.js"),
     utilsModule: typeof import("./Utils.js"),
     intensity: number,
@@ -54,19 +54,6 @@ export function handleShow(svg: ISvg, isUsing: boolean): void {
     } else {
         svg.el.style.display = "none";
     }
-}
-
-abstract class MySVG {
-    public el: SVGElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    public handleShow(isUsing: boolean) {
-        if (isUsing) {
-            this.el.style.display = "block";
-        } else {
-            this.el.style.display = "none";
-        }
-    }
-    // to be overriden
-    public moveSvgFromMessage(_intensity: number): void {}
 }
 
 export function createFader(): IFader {

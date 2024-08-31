@@ -37,7 +37,12 @@ export function createMIDIDeviceDisplay(
     );
 
     ret.midiSelectorContainer = document.createElement("div");
-    ret.midiSelector = midiSelectorModule.createMIDISelector();
+    ret.midiSelectorContainer.style.display = "flex";
+    ret.midiSelectorContainer.style.width = "100%";
+    ret.midiSelectorContainer.style.justifyContent = "center";
+    ret.midiSelectorContainer.style.margin = "10px";
+
+    ret.midiSelector = midiSelectorModule.createMIDISelector(midiSelectorModule);
 
     ret.toggleMIDIEditModeButton = document.createElement("button");
     ret.toggleMIDIEditModeButtonContainer = document.createElement("div");
@@ -49,7 +54,7 @@ export function createMIDIDeviceDisplay(
     ret.toggleMIDIEditModeButton.style.backgroundColor = "grey";
     ret.toggleMIDIEditModeButton.style.color = "white";
     ret.toggleMIDIEditModeButton.style.borderRadius = "5px";
-    ret.toggleMIDIEditModeButton.textContent = "MIDI Mapping Edit Mode ON"
+    ret.toggleMIDIEditModeButton.textContent = "MIDI Mapping Edit Mode OFF"
     ret.toggleMIDIEditModeButton.onclick = 
         () => uiModule.handleMIDIEditModeButtonClick(
             appModule,

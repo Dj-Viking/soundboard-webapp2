@@ -4,10 +4,18 @@ export interface IMIDISelector {
     selectEl: HTMLSelectElement
 }
 
-export function createMIDISelector(): IMIDISelector {
+export function createMIDISelector(
+    midiSelectorModule: typeof import("./MIDISelector.js")
+): IMIDISelector {
     const ret: IMIDISelector = {} as any;
 
     ret.selectEl = document.createElement("select");
+    ret.selectEl.style.width = "50%";
+
+    ret.selectEl.onchange = (e) => {
+        const ev: MyEvent = e as any;
+        midiSelectorModule.selectDevice(ret, ev.target.value);
+    }
 
     const defaultOption = document.createElement("option");
     defaultOption.value = "";

@@ -20,7 +20,7 @@ console.log("hello world");
     let utilsModule = await import("./Utils.js");
     
     // initialize indexed DB when the app starts
-    idbModule.initButtonsIdb()
+    idbModule.initButtonsIdb();
     
     ws.addEventListener("message", async (event) => {
         if (event.data.includes("hot")) {

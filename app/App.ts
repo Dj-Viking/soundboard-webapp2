@@ -1,4 +1,4 @@
-import type { UIInterfaceDeviceName } from "./MIDIController.js";
+import { MIDIController, type MIDIAccessRecord, type UIInterfaceDeviceName } from "./MIDIController.js";
 import { IMIDIDeviceDisplay } from "./MIDIDeviceDisplay.js";
 import { createMIDIMappingPreference } from "./MIDIMapping.js";
 
@@ -37,91 +37,120 @@ export function renderApp(
     svgModule: typeof import("./SVG.js"),
     utilsModule: typeof import("./Utils.js")
 ) {
-    // HEAD //
-    {
-        uiModule.setupDocumentHead(stylesModule);
-    }
-    // HEAD //
 
-    // TXT //
-    const ctrlKeyMessageSpan = uiModule.createCtrlKeyMessageSpan();
-    const fKeyMessageSpan = uiModule.createFKeyMessageSpan();
-    // TXT //
-    
+    // MIDI //
+    (async function () {
+        return new Promise<MIDIController>(async (res, rej) => {
+            try {
+                const midiAccess = await MIDIController.requestMIDIAccess();
+                if (midiAccess) {
+                    appModule.state.midiController = new MIDIController(midiAccess);
+                    console.log("got midi stuff", appModule.state.midiController);
+                    res(appModule.state.midiController);
+                }
+            } catch (error) {
+                rej(error);
+            }
+        });
+    // MIDI //
+    })().then((midiController: MIDIController) => {
 
-    // EVENTS //
-    {
-        uiModule.setupKeyListeners(appModule, fKeyMessageSpan, ctrlKeyMessageSpan);
-    }
-    // EVENTS //
-
-
-    // RENDERING //
-    document.body.innerHTML = "";
-    const midiDeviceDisplay: IMIDIDeviceDisplay = midiDeviceDisplayModule.createMIDIDeviceDisplay(
-        appModule,
-        uiModule,
-        midiDeviceDisplayModule,
-        midiSelectorModule,
-        svgModule,
-        utilsModule
-    )
-    const volumeControlInput: HTMLInputElement = uiModule.setupVolumeControlInput(
-        appModule,
-    );
-    const volumeInputText = uiModule.setupVolumeInputText(volumeControlInput);
-    const stopButtonEl = document.createElement("button");
+        // HEAD //
+        {
+            uiModule.setupDocumentHead(stylesModule);
+        }
+        // HEAD //
     
-    const soundboardContainer = uiModule.setupSoundboardContainer(
-        appModule,
-        uiModule,
-        buttonModule,
-        storageModule,
-        idbModule,
-        volumeControlInput,
-        volumeInputText,
-        stopButtonEl,
-    );
+        // TXT //
+        const ctrlKeyMessageSpan = uiModule.createCtrlKeyMessageSpan();
+        const fKeyMessageSpan = uiModule.createFKeyMessageSpan();
+        // TXT //
+        
     
-    const { 
-        buttonControlContainer,
-        trackTimeTextSpan,
-        trackProgressBar
-    } = uiModule.setupButtonControlContainer(
-        appModule,
-        uiModule,
-        buttonModule, 
-        idbModule, 
-        storageModule, 
-        soundboardContainer, 
-        volumeControlInput,
-        volumeInputText,
-        stopButtonEl,
-        fKeyMessageSpan,
-        ctrlKeyMessageSpan,
-    );
-    // render into document body
+        // EVENTS //
+        {
+            uiModule.setupKeyListeners(appModule, fKeyMessageSpan, ctrlKeyMessageSpan);
+        }
+        // EVENTS //
     
-    document.body.append(
-        midiDeviceDisplay.container,
-        midiDeviceDisplay.toggleMIDIEditModeButtonContainer,
-        buttonControlContainer, 
-        soundboardContainer
-    );
+        
     
-    // RENDERING //
-
-    // RAF
-    function animate(_timestamp?: number) {
-        uiModule.handleAnimate(
+    
+        // RENDERING //
+        document.body.innerHTML = "";
+        const midiDeviceDisplay: IMIDIDeviceDisplay = midiDeviceDisplayModule.createMIDIDeviceDisplay(
             appModule,
             uiModule,
-            trackProgressBar,
-            trackTimeTextSpan
-        )
+            midiDeviceDisplayModule,
+            midiSelectorModule,
+            svgModule,
+            utilsModule
+        );
+
+        midiSelectorModule.appendMIDIDeviceNames(midiDeviceDisplay.midiSelector, midiController.inputs);
+
+        const volumeControlInput: HTMLInputElement = uiModule.setupVolumeControlInput(
+            appModule,
+        );
+        const volumeInputText = uiModule.setupVolumeInputText(volumeControlInput);
+        const stopButtonEl = document.createElement("button");
+        
+        const soundboardContainer = uiModule.setupSoundboardContainer(
+            appModule,
+            uiModule,
+            buttonModule,
+            storageModule,
+            idbModule,
+            volumeControlInput,
+            volumeInputText,
+            stopButtonEl,
+        );
+        
+        const { 
+            buttonControlContainer,
+            trackTimeTextSpan,
+            trackProgressBar
+        } = uiModule.setupButtonControlContainer(
+            appModule,
+            uiModule,
+            buttonModule, 
+            idbModule, 
+            storageModule, 
+            soundboardContainer, 
+            volumeControlInput,
+            volumeInputText,
+            stopButtonEl,
+            fKeyMessageSpan,
+            ctrlKeyMessageSpan,
+        );
+        // render into document body
+
+        midiDeviceDisplay.midiSelectorContainer.append(midiDeviceDisplay.midiSelector.selectEl);
+        
+        document.body.append(
+            midiDeviceDisplay.container,
+            midiDeviceDisplay.midiSelectorContainer,
+            midiDeviceDisplay.toggleMIDIEditModeButtonContainer,
+            buttonControlContainer, 
+            soundboardContainer
+        );
+        
+        // RENDERING //
+    
+        // RAF
+        function animate(_timestamp?: number) {
+            uiModule.handleAnimate(
+                appModule,
+                uiModule,
+                trackProgressBar,
+                trackTimeTextSpan
+            )
+            window.requestAnimationFrame(animate);
+        }
         window.requestAnimationFrame(animate);
-    }
-    window.requestAnimationFrame(animate);
-    // RAF
+        // RAF
+    });
+
+
 
 }
