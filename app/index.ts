@@ -14,6 +14,10 @@ console.log("hello world");
     let storageModule = await import("./Storage.js");
     let uiModule = await import("./UI.js");
     let appModule = await import("./App.js");
+    let midiDeviceDisplayModule = await import("./MIDIDeviceDisplay.js");
+    let midiSelectorModule = await import("./MIDISelector.js");
+    let svgModule = await import("./SVG.js");
+    let utilsModule = await import("./Utils.js");
     
     // initialize indexed DB when the app starts
     idbModule.initButtonsIdb()
@@ -28,6 +32,10 @@ console.log("hello world");
             storageModule = await import("./Storage.js" + browserCacheBust);
             uiModule = await import("./UI.js" + browserCacheBust);
             appModule = await import("./App.js" + browserCacheBust);
+            midiDeviceDisplayModule = await import("./MIDIDeviceDisplay.js" + browserCacheBust);
+            midiSelectorModule = await import("./MIDISelector.js" + browserCacheBust);
+            svgModule = await import("./SVG.js" + browserCacheBust);
+            utilsModule = await import("./Utils.js" + browserCacheBust);
             // could just export all the functions used
             // in rendering the app so that everything happening there is dynamically
             // loaded
@@ -37,7 +45,11 @@ console.log("hello world");
                 styleModule,
                 idbModule,
                 storageModule,
-                uiModule
+                uiModule,
+                midiDeviceDisplayModule,
+                midiSelectorModule,
+                svgModule,
+                utilsModule
             );
         }
     });
@@ -48,7 +60,11 @@ console.log("hello world");
         styleModule,
         idbModule,
         storageModule,
-        uiModule
+        uiModule,
+        midiDeviceDisplayModule,
+        midiSelectorModule,
+        svgModule,
+        utilsModule
     );
 
 })();

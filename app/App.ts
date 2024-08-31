@@ -1,4 +1,5 @@
 import type { UIInterfaceDeviceName } from "./MIDIController.js";
+import { IMIDIDeviceDisplay } from "./MIDIDeviceDisplay.js";
 import { createMIDIMappingPreference } from "./MIDIMapping.js";
 
 // application state (global)
@@ -30,7 +31,11 @@ export function renderApp(
     stylesModule: typeof import("./Styles.js"),
     idbModule: typeof import("./IDB.js"),
     storageModule: typeof import("./Storage.js"),
-    uiModule: typeof import("./UI.js")
+    uiModule: typeof import("./UI.js"),
+    midiDeviceDisplayModule: typeof import("./MIDIDeviceDisplay.js"),
+    midiSelectorModule: typeof import("./MIDISelector.js"),
+    svgModule: typeof import("./SVG.js"),
+    utilsModule: typeof import("./Utils.js")
 ) {
     // HEAD //
     {
@@ -53,6 +58,14 @@ export function renderApp(
 
     // RENDERING //
     document.body.innerHTML = "";
+    const midiDeviceDisplay: IMIDIDeviceDisplay = midiDeviceDisplayModule.createMIDIDeviceDisplay(
+        appModule,
+        uiModule,
+        midiDeviceDisplayModule,
+        midiSelectorModule,
+        svgModule,
+        utilsModule
+    )
     const volumeControlInput: HTMLInputElement = uiModule.setupVolumeControlInput(
         appModule,
     );
@@ -88,7 +101,13 @@ export function renderApp(
         ctrlKeyMessageSpan,
     );
     // render into document body
-    document.body.append(buttonControlContainer, soundboardContainer);
+    
+    document.body.append(
+        midiDeviceDisplay.container,
+        midiDeviceDisplay.toggleMIDIEditModeButtonContainer,
+        buttonControlContainer, 
+        soundboardContainer
+    );
     
     // RENDERING //
 

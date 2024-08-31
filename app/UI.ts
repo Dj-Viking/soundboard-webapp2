@@ -1,4 +1,5 @@
 import { IButton } from "./Button.js";
+import type { IMIDIDeviceDisplay } from "./MIDIDeviceDisplay.js";
 
 export function setupDocumentHead(styles: typeof import("./Styles.js")): void {
     const title = document.createElement("title");
@@ -251,19 +252,24 @@ export function createFKeyMessageSpan () {
     return span;
 }
 
-// TODO: 
-// private handleMIDIEditModeButtonClick = (): void => {
-//     this.isMIDIEdit = !this.isMIDIEdit;
-//     if (this.isMIDIEdit) {
-//         this.midiDeviceDisplay.showAssignmentSpans();
-//         this.toggleMIDIEditModeButton.textContent = "MIDI Mapping Edit Mode ON";
-//         this.toggleMIDIEditModeButton.style.backgroundColor = "green";
-//     } else {
-//         this.midiDeviceDisplay.hideAssignmentSpans();
-//         this.toggleMIDIEditModeButton.textContent = "MIDI Mapping Edit Mode OFF";
-//         this.toggleMIDIEditModeButton.style.backgroundColor = "grey";
-//     }
-// };
+export function handleMIDIEditModeButtonClick(
+    appModule: typeof import("./App.js"),
+    midiDeviceDisplayModule: typeof import("./MIDIDeviceDisplay.js"),
+    midiDeviceDisplay: IMIDIDeviceDisplay
+): void {
+    appModule.state.isMIDIEdit = !appModule.state.isMIDIEdit;
+    if (appModule.state.isMIDIEdit) {
+        midiDeviceDisplayModule.showAssignmentSpans(midiDeviceDisplay);
+        midiDeviceDisplay.toggleMIDIEditModeButton.textContent = "MIDI Mapping Edit Mode ON";
+        midiDeviceDisplay.toggleMIDIEditModeButton.style.backgroundColor = "green";
+    } else {
+        midiDeviceDisplayModule.hideAssignmentSpans(
+            midiDeviceDisplay
+        );
+        midiDeviceDisplay.toggleMIDIEditModeButton.textContent = "MIDI Mapping Edit Mode OFF";
+        midiDeviceDisplay.toggleMIDIEditModeButton.style.backgroundColor = "grey";
+    }
+};
 
 export function refreshTrackProgress(
     trackProgressBar: HTMLProgressElement, 
